@@ -1,0 +1,15 @@
+services:
+  ipxe-server:
+    image: ipxe-server:latest # Build a custom iPXE server image
+    container_name: ipxe-container
+    restart: unless-stopped
+    privileged: true          # Required for dnsmasq to manage network interfaces
+    network_mode: "host"      # Needed for PXE (DHCP/TFTP)
+    volumes:
+      - ./config:/config      # iPXE scripts (boot.ipxe, etc.)
+      - ./images:/images      # OS installation files
+    ports:
+      - "69:69/udp"        # TFTP
+      - "80:80/tcp"        # HTTP (for iPXE scripts)
+      - "67:67/udp"        # DHCP (if not running elsewhere)
+    command: ["/entrypoint.sh"]
