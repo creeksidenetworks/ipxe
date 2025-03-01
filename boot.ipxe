@@ -1,0 +1,39 @@
+#!ipxe
+:global_vars
+#set rocky8_mirror http://download.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
+set rocky8_mirror http://dl.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
+set rocky8_mini_ks http://ipxe.creekside.network/kickstart/rocky8-mini.ks
+set rocky8_mate_ks http://ipxe.creekside.network/kickstart/rocky8-mate.ks
+
+menu Creekside Networks Boot Menu
+item --gap -- --------------------------------------------------------------------------
+item local Boot from local hdd
+item --gap -- --------------------------------------------------------------------------
+item rocky8mini Install Rocky Linux 8 minimum
+item rocky8mate Install Rocky Linux 8 with Mate Desktop
+item --gap -- --------------------------------------------------------------------------
+item shell iPXE Shell
+item reboot Reboot
+item --gap -- --------------------------------------------------------------------------
+choose --timeout 15000 target && goto ${target}
+
+:local
+echo Booting from local disks ...
+exit 1
+
+:rocky8mini
+kernel ${rocky8_mirror}images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${rocky8_mirror} inst.ks=${rocky8_mini_ks}
+initrd ${rocky8_mirror}images/pxeboot/initrd.img
+boot
+
+
+:rocky8mate
+kernel ${rocky8_mirror}images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${rocky8_mirror} inst.ks=${rocky8_mate_ks}
+initrd ${rocky8_mirror}images/pxeboot/initrd.img
+boot
+
+:shell
+shell
+
+:reboot
+reboot
