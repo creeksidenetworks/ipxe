@@ -157,7 +157,7 @@ dnf install https://dl.google.com/linux/direct/google-chrome-stable_current_x86_
 dnf install -y firefox filezilla evince
 
 # install tigervnc-server
-dnf install tigervnc-server tigervnc
+dnf install -y tigervnc-server tigervnc
 
 # disable intel sfp check
 echo "options ixgbe allow_unsupported_sfp=1" > /etc/modprobe.d/ixgbe.conf                                                                               
