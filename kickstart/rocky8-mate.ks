@@ -23,8 +23,8 @@ services --enabled=sshd
 network --bootproto=dhcp --device=eth0 --onboot=on
 
 # Use the Rocky Linux 8 mirror
-url --url=https://download.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
-repo --name=AppStream --baseurl=https://download.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/
+url --url=https://dl.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
+repo --name=AppStream --baseurl=https://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/
 
 # Partitioning (auto-erase disk)
 clearpart --all --initlabel
@@ -155,6 +155,9 @@ dnf install -y vim vim-X11 emacs tilix sublime-text meld tmux
 # install chrome & firefox 
 dnf install https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -y
 dnf install -y firefox filezilla evince
+
+# install tigervnc-server
+dnf install tigervnc-server tigervnc
 
 # disable intel sfp check
 echo "options ixgbe allow_unsupported_sfp=1" > /etc/modprobe.d/ixgbe.conf                                                                               
