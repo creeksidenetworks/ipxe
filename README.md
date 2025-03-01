@@ -41,8 +41,9 @@ set service dns forwarding options 'dhcp-userclass=set:ipxe,iPXE'
 set service dns forwarding options 'dhcp-boot=tag:ipxe,http://ipxe.creekside.network/boot.ipxe'
 ```
 
-## Hosting your own website
-### Edgerouter webserver
+## Hosting your own website on Edgerouter
+
+The following steps are optional. You will need to change the DNSMASQ 2nd stage setting to your router's loopback IP
 
 - Change router management UI to alternative port
 ```bash
