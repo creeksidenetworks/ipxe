@@ -4,7 +4,7 @@
 - Client use TFTP to download the iPXE firmware and start execution.
 - Client then inquiry DHCP server for next step, DHCP server reply with the URL of iPXE script (boot.ipxe)
 - iPXE firmware execute the iPXE script and download the bootloader from a remote HTTP server
-- For RHEL OS (CentOS/RockyOS), a kickstart file tell OS installed the configuration and post install scripts to run. After installation, the installer will reboot the client server
+- For RHEL OS (CentOS/RockyOS), a kickstart file tell OS installer the configuration and post install scripts to run. After installation, the installer will reboot the client server
 
 ## Major components
 - A DHCP server
