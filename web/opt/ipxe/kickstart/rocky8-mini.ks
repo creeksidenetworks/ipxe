@@ -10,8 +10,8 @@ timezone America/Los_Angeles --utc
 # disable selinux
 selinux --disabled
 
-# enable network interface rename
-bootloader --append="net.ifnames=0"
+# enable network interface rename & disable intel nic sfp compatibility check
+bootloader --location=mbr --append="net.ifnames=0 ixgbe.allow_unsupported_sfp=1"
 
 # Root password (hashed)
 rootpw --iscrypted $6$CeUazULn6EoZHHpv$YSUsLCOl0YMy091MfngoQwK6u6/ZL.Sn24uiFUyM.gD2PG8hjNNGb8gNsTm6IbL9tefWuHbL1.ckzgJuXRV3T1
@@ -28,17 +28,7 @@ repo --name=AppStream --baseurl=https://download.rockylinux.org/pub/rocky/8/AppS
 
 # Partitioning (auto-erase disk)
 clearpart --all --initlabel
-# EFI System Partition (Required for UEFI)
-part /boot/efi --fstype=efi --size=600 --fsoptions="umask=0077,shortname=winnt"
-# Boot Partition
-part /boot --fstype=xfs --size=1024
-# Create LVM physical volume
-part pv.01 --size=1 --grow
-# Create volume group
-volgroup vg_root pv.01
-# Create logical volumes
-logvol swap --vgname=vg_root --name=lv_swap --size=2048
-logvol / --vgname=vg_root --name=lv_root --fstype=xfs --size=10000 --grow
+autopart --type=lvm --fstype=xfs --nohome 
 
 # Install additional packages
 %packages
