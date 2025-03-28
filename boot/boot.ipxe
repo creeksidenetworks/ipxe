@@ -5,7 +5,7 @@ set base_url       http://ipxe.creekside.network
 set rocky8_mirror  http://dl.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
 set rocky9_mirror  http://dl.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/
 set rocky8_ks ${base_url}/kickstart/rocky8.ks
-set vyos_url       ${base_url}/images/vyos/disk/live
+set vyos_url       ${base_url}/assets/vyos/disk/live
 
 menu Creekside Networks Boot Menu
 item --gap -- --------------------------------------------------------------------------
@@ -13,7 +13,7 @@ item local     Boot from local HDD
 item --gap -- --------------------------------------------------------------------------
 item rocky     Install Rocky Linux
 item vmware    Install VMWare ESXi
-item vyos      Install VyOS 1.3.4
+item vyos      Install VyOS
 item --gap -- --------------------------------------------------------------------------
 item shell iPXE Shell
 item reboot Reboot
@@ -99,11 +99,11 @@ boot
 
 
 :exsi7
-kernel http://ipxe.creekside.network/images/esxi7/efi/boot/bootx64.efi -c http://ipxe.creekside.network/images/esxi7/boot.cfg
+kernel http://ipxe.creekside.network/assets/vmware/esxi7/efi/boot/bootx64.efi -c http://ipxe.creekside.network/assets/vmware/bootcfg/boot_esxi7.cfg
 boot
 
 :exsi8
-kernel http://ipxe.creekside.network/images/esxi8/efi/boot/bootx64.efi -c http://ipxe.creekside.network/images/esxi8/boot.cfg
+kernel http://ipxe.creekside.network/assets/vmware/esxi8/efi/boot/bootx64.efi -c http://ipxe.creekside.network/assets/vmware/bootcfg/boot_esxi8.cfg
 boot
 
 :shell

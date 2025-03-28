@@ -47,6 +47,21 @@ set service dns forwarding options 'dhcp-boot=tag:efi64-2,ipxe.efi,,10.255.255.2
 set service dns forwarding options 'dhcp-userclass=set:ipxe,iPXE'
 set service dns forwarding options 'dhcp-boot=tag:ipxe,http://ipxe.creekside.network/boot.ipxe'
 ```
+## http webserver 
+
+boot
+├── assets
+│   ├── vmware
+│   │   ├── bootcfg
+│   │   ├── esxi7
+│   │   └── esxi8
+│   └── vyos
+│       └── disk
+├── boot.ipxe
+└── kickstart
+    └── rocky8.ks
+
+extract your dvd-rom contents to boot/assets/vyos/disk or boot/assets/vmware/esxi7 etc.
 
 ## Hosting your own website on Edgerouter
 
@@ -70,3 +85,4 @@ sudo apt update
 sudo apt install nginx-light -y
 ```
 -- Upload the files to router & restart nginx service
+
