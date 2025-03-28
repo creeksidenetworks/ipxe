@@ -48,7 +48,8 @@ set service dns forwarding options 'dhcp-userclass=set:ipxe,iPXE'
 set service dns forwarding options 'dhcp-boot=tag:ipxe,http://ipxe.creekside.network/boot.ipxe'
 ```
 ## http webserver 
-
+### Directory Structure
+```
 boot
 ├── assets
 │   ├── vmware
@@ -60,6 +61,7 @@ boot
 ├── boot.ipxe
 └── kickstart
     └── rocky8.ks
+```
 
 extract your dvd-rom contents to boot/assets/vyos/disk or boot/assets/vmware/esxi7 etc.
 
