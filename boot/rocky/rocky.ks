@@ -30,10 +30,6 @@ sshkey --username=jackson "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDHrPVbtdHf0aJeR
 # Use DHCP for networking
 network --bootproto=dhcp --device=eth0 --noipv6 --onboot=on
 
-# Use the Rocky Linux 8 mirror
-url --url=http://dl.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
-repo --name=AppStream --baseurl=http://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/
-
 # Include the dynamically generated partition information
 %include /tmp/part-include
 
@@ -57,8 +53,11 @@ for I in $*; do
     esac; 
 done
 
+#printf "Rocky base url     : $rockybaseurl\n"  > /dev/tty1
+#printf "partition selected : $partition\n" > /dev/tty1
+#sleep 10
+
 if [[ "$partition" == "auto" ]]; then
-    echo "Auto partition selected" > /dev/tty1
     # Contintue with auto partition
     # Calculate total RAM in megabytes
     MAX_SWAP_SIZE=$(awk '/MemTotal/ {print int($2 / 1024)}' /proc/meminfo)
@@ -130,14 +129,19 @@ logvol / --vgname=vg_root --name=lv_root --fstype=xfs --size=10000 --grow --maxs
 EOF
 
 else
-    echo "Manual partition selected" > /dev/tty1
     echo "clearpart --all --initlabel --disklabel=gpt" > /tmp/part-include
 fi
 
 %end
 
+
+#------------------------------------------------------------------
+# post installation scripts
+#------------------------------------------------------------------
 %post
 #!/bin/bash
+
+printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Post installation starts" 
 
 # read arguments from ipxe
 set -- `cat /proc/cmdline`
@@ -151,19 +155,53 @@ done
 # disable sudo password requirement
 echo "%wheel	ALL=(ALL)	NOPASSWD: ALL" > /etc/sudoers.d/nopasswd
 
-# install essential packages
 yum install epel-release yum-utils -y   
 yum config-manager --set-enabled powertools
+#dnf reinstall ca-certificates -y
+
+# Update Rocky and EPEL repository baseurls to use the provided ${baseurl}
+case $region in
+    "china")
+        baseos_url="http://mirrors.ustc.edu.cn/rocky"
+        epel_url="http://mirrors.ustc.edu.cn/epel"
+        ;;
+    *)
+        baseos_url=""
+        epel_url=""
+        ;;
+esac
+
+if [ -n "$baseos_url" ]; then
+    # Update Rocky repos
+    for repo in /etc/yum.repos.d/Rocky-*.repo; do
+        sed -i -E "s%^([[:space:]]*)#?([[:space:]]*)baseurl=http.*contentdir%baseurl=${baseos_url}%" "$repo"
+        sed -i 's/^mirrorlist=/#mirrorlist=/' "$repo"
+    done
+fi
+
+if [ -n "$epel_url" ]; then
+    # Update EPEL repos
+    for repo in /etc/yum.repos.d/epel*.repo; do
+        sed -i -E "s%^([[:space:]]*)#?([[:space:]]*)baseurl=http.*epel%baseurl=${epel_url}%" "$repo"
+        #sed -i "s|^[[:space:]]*#?[[:space:]]*baseurl=.*epel|baseurl=${epel_url}|g" "$repo"
+        sed -i 's/^metalink=/#metalink=/' "$repo"
+    done
+fi
+
+# install essential packages
+printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install essential packages" 
+yum update -y
 yum install libnsl -y
 dnf install -y rsync util-linux curl firewalld bind-utils telnet jq nano 
 dnf install -y ed tcpdump wget nfs-utils cifs-utils samba-client tree xterm net-tools 
 dnf install -y dnf install -y openldap-clients sssd realmd oddjob oddjob-mkhomedir adcli 
 dnf install -y samba-common samba-common-tools krb5-workstation openldap-clients iperf3 rsnapshot zip 
 dnf install -y nnzip ftp autofs zsh ksh tcsh ansible cabextract fontconfig 
-dnf install -y nedit htop tar traceroute mtr pwgen ipa-admintools 
+dnf install -y nedit htop tar traceroute mtr pwgen ipa-admintools sssd realmd zsh ksh tcsh
 dnf install -y cyrus-sasl cyrus-sasl-plain cyrus-sasl-ldap bc nmap-ncat
 
 # install development tools
+printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install development tools" 
 dnf groupinstall "Development tools" -y
 
 # install docker ce
@@ -173,7 +211,12 @@ yum update -y
 yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 systemctl enable docker
 
-if [ $desktop = "mate" ]; then
+if [ $desktop = "desktop" ]; then
+    # install xfce desktop
+    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install XFCE desktop" 
+    dnf groupinstall -y "Xfce"
+
+    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install mate desktop" 
     # install mate desktop
     dnf install -y NetworkManager-adsl NetworkManager-bluetooth NetworkManager-libreswan-gnome NetworkManager-openvpn-gnome 
     dnf install -y NetworkManager-ovs NetworkManager-ppp NetworkManager-team NetworkManager-wifi NetworkManager-wwan abrt-desktop 
@@ -227,6 +270,7 @@ if [ $desktop = "mate" ]; then
     " > /etc/xdg/autostart/disable-dpms.desktop
 
     # install desktop applications
+    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install misc desktop applications" 
     echo "
 [ivoarch-Tilix]
 name=Copr repo for Tilix owned by ivoarch
@@ -248,29 +292,39 @@ enabled=1
 gpgcheck=0
 gpgkey=https://download.sublimetext.com/sublimehq-rpm-pub.gpg
 " > /etc/yum.repos.d/sublime-text.repo
+
     dnf install -y vim vim-X11 emacs tilix sublime-text meld tmux
 
     # install chrome & firefox 
+    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install browsers" 
+
     dnf install https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -y
     dnf install -y firefox filezilla evince
 
     # install tigervnc-server
     dnf install -y tigervnc-server tigervnc
+
+    # libre office
+    lastest_libre_version=$(curl --silent --max-time 15 http://download.documentfoundation.org/libreoffice/stable/ | grep -oP 'href="\K[0-9.]+(?=/)' | sort -V | tail -1)
+    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Libera Office verion ${lastest_libre_version}" 
+    RPM_PATH="/opt/libreoffice/rpm"
+    RPM_FILE="${RPM_PATH}/LibreOffice_${lastest_libre_version}_Linux_x86-64_rpm.tar.gz"
+    mkdir -p $RPM_PATH
+
+    REMOTE_URL="http://download.documentfoundation.org/libreoffice/stable/${lastest_libre_version}/rpm/x86_64/LibreOffice_${lastest_libre_version}_Linux_x86-64_rpm.tar.gz"
+    curl -# -L http://download.documentfoundation.org/libreoffice/stable/${lastest_libre_version}/rpm/x86_64/LibreOffice_${lastest_libre_version}_Linux_x86-64_rpm.tar.gz -o $RPM_FILE
+
+    if [ -f $RPM_FILE ]; then
+        WORK_DIR=$(mktemp -d)
+        printf "\nInstall Libreoffice $lastest_libre_version \n" 
+        tar xzf $RPM_FILE --strip-components=2 -C ${WORK_DIR}
+        yum localinstall ${WORK_DIR}/*.rpm -y
+        rm -rf WORK_DIR
+    else
+        printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Libera Office downlaod failed" 
+    fi
 fi 
 
-# Modify all Rocky Linux repo files to use baseurl
-for repo in /etc/yum.repos.d/Rocky-*.repo; do
-    # Comment out mirrorlist
-    sed -i 's/^mirrorlist=/#mirrorlist=/' "$repo"
-
-    # Uncomment baseurl if it's commented out
-    sed -i 's/^#baseurl=/baseurl=/' "$repo"
-
-    # Ensure repositories are enabled
-    #sed -i 's/^enabled=0/enabled=1/' "$repo"
-done
-
-cp /tmp/ks_pre.log /var/log/
 %end
 
 # Reboot after installation

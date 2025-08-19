@@ -1,12 +1,10 @@
 #!ipxe
 
 :global_vars
-set base_url       http://ipxe.creekside.network
-set rocky8_mirror  http://dl.rockylinux.org/pub/rocky/8/BaseOS/x86_64/os/
-set rocky9_mirror  http://dl.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/
-set rocky8_ks ${base_url}/kickstart/rocky8.ks
-set vyos_url       ${base_url}/assets/vyos/disk/live
+set base_url        http://ipxe.creekside.network
+set vyos_url        ${base_url}/assets/vyos/disk/live
 
+:main_menu
 menu Creekside Networks Boot Menu
 item --gap -- --------------------------------------------------------------------------
 item local     Boot from local HDD
@@ -15,8 +13,8 @@ item rocky     Install Rocky Linux
 item vmware    Install VMWare ESXi
 item vyos      Install VyOS
 item --gap -- --------------------------------------------------------------------------
-item shell iPXE Shell
-item reboot Reboot
+item shell     iPXE Shell
+item reboot    Reboot
 item --gap -- --------------------------------------------------------------------------
 choose --timeout 15000 target && goto ${target}
 
@@ -25,72 +23,17 @@ echo Booting from local disks ...
 exit 1
 
 :rocky
-menu Choose Rocky Linux Version
-item --gap -- --------------------------------------------------------------------------
-item rocky8 Rocky Linux 8
-item rocky9 Rocky Linux 9
-item --gap -- --------------------------------------------------------------------------
-item back   Back to Main Menu
-item --gap -- --------------------------------------------------------------------------
-choose version && goto ${version}
+chain ${base_url}/rocky/rocky.ipxe
 
 :vmware
 menu Choose VMWare ESXi Version
 item --gap -- --------------------------------------------------------------------------
-item exsi7 VMWare ESXi 7.3n
-item exsi8 VMWare ESXi 8.1a
+item exsi7    VMWare ESXi 7.3n
+item exsi8    VMWare ESXi 8.1a
 item --gap -- --------------------------------------------------------------------------
-item back   Back to Main Menu
+item back     Back to Main Menu
 item --gap -- --------------------------------------------------------------------------
 choose version && goto ${version}
-
-:rocky8
-set rocky_mirror ${rocky8_mirror}
-set ks ${rocky8_ks}
-goto rocky_desktop
-
-:rocky9
-set rocky_mirror ${rocky9_mirror}
-set ks ${rocky9ks}
-goto rocky_desktop
-
-:rocky_desktop
-menu Choose Desktop Environment
-item --gap -- --------------------------------------------------------------------------
-item mini Rocky Minimal Install
-item mate Rocky with Mate Desktop
-item --gap -- --------------------------------------------------------------------------
-item back Back to Version Selection
-item --gap -- --------------------------------------------------------------------------
-choose desktop && goto ${desktop}
-
-:mini
-set ROCKY_DESKTOP none
-goto rocky_partition
-
-:mate
-set ROCKY_DESKTOP mate
-goto rocky_partition
-
-:rocky_partition
-menu Choose Partition Mode
-item --gap -- --------------------------------------------------------------------------
-item auto Auto Partitioning
-item manual Manual Partitioning
-item --gap -- --------------------------------------------------------------------------
-item back Back to Desktop Selection
-item --gap -- --------------------------------------------------------------------------
-choose partition && goto ${partition}
-
-:auto
-kernel ${rocky_mirror}images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${rocky_mirror} inst.ks=${ks} desktop=${ROCKY_DESKTOP} partition=auto
-initrd ${rocky_mirror}images/pxeboot/initrd.img
-boot
-
-:manual
-kernel ${rocky_mirror}images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${rocky_mirror} inst.ks=${ks} desktop=${ROCKY_DESKTOP} partition=manual
-initrd ${rocky_mirror}images/pxeboot/initrd.img
-boot
 
 :vyos
 kernel ${vyos_url}/vmlinuz boot=live components hostname=vyos username=live nopersistence noautologin union=overlay console=tty0 net.ifnames=0 biosdevname=0 fetch=${vyos_url}/filesystem.squashfs initrd=initrd.magic 

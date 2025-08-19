@@ -1,0 +1,86 @@
+#!ipxe
+
+:global_vars
+set base_url        http://ipxe.creekside.network/rocky
+
+:version_menu
+menu Choose Rocky Linux Version
+item --gap -- --------------------------------------------------------------------------
+item rocky8   Rocky Linux 8
+item rocky9   Rocky Linux 9
+item --gap -- --------------------------------------------------------------------------
+item back     Back to Main Menu
+item --gap -- --------------------------------------------------------------------------
+choose version && goto ${version}
+
+:back
+chain ${base_url}/boot.ipxe
+
+:rocky8
+set version 8
+goto desktop_menu
+
+:rocky9
+set version 9
+goto desktop_menu
+
+:desktop_menu
+menu Choose Desktop Environment
+item --gap -- --------------------------------------------------------------------------
+item mini     Minimal
+item desktop     Desktop
+item --gap -- --------------------------------------------------------------------------
+item version_menu     Back to Version Selection
+item --gap -- --------------------------------------------------------------------------
+choose desktop && goto ${desktop}
+
+:mini
+set install_type mini
+goto partition_menu
+
+:desktop
+set install_type desktop
+goto partition_menu
+
+:partition_menu
+menu Choose Partition Mode
+item --gap -- --------------------------------------------------------------------------
+item auto     Auto Partitioning
+item manual   Manual Partitioning
+item --gap -- --------------------------------------------------------------------------
+item desktop_menu     Back to Desktop Selection
+item --gap -- --------------------------------------------------------------------------
+choose partition && goto ${partition}
+
+:auto
+set partition_mode auto
+goto region_menu
+
+:manual 
+set partition_mode manual
+goto region_menu
+
+:region_menu
+menu Choose Region
+item --gap -- --------------------------------------------------------------------------
+item global   Global - Official Rocky Server
+item china    China  - UTSC Mirror
+item --gap -- --------------------------------------------------------------------------
+item partition_menu     Back to Desktop Selection
+item --gap -- --------------------------------------------------------------------------
+choose region && goto ${region}
+
+:global
+set base-rocky-url  http://dl.rockylinux.org/pub/rocky
+set region global
+goto launch
+
+:china
+set base-rocky-url  http://mirrors.ustc.edu.cn/rocky
+set region china
+goto launch
+
+:launch
+kernel ${base-rocky-url}/${version}/BaseOS/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${base-rocky-url}/${version}/BaseOS/x86_64/os inst.ks=${base_url}/rocky.ks desktop=${install_type} region=${region} partition=${partition_mode}
+initrd ${base-rocky-url}/${version}/BaseOS/x86_64/os/images/pxeboot/initrd.img
+boot
