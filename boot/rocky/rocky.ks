@@ -212,10 +212,6 @@ yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 systemctl enable docker
 
 if [ $desktop = "desktop" ]; then
-    # install xfce desktop
-    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install XFCE desktop" 
-    dnf groupinstall -y "Xfce"
-
     printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install mate desktop" 
     # install mate desktop
     dnf install -y NetworkManager-adsl NetworkManager-bluetooth NetworkManager-libreswan-gnome NetworkManager-openvpn-gnome 
@@ -268,6 +264,10 @@ if [ $desktop = "desktop" ]; then
     Comment[en_US]=Disable DPMS
     Comment=Disable DPMS
     " > /etc/xdg/autostart/disable-dpms.desktop
+
+    # install xfce desktop
+    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install XFCE desktop" 
+    dnf groupinstall -y "Xfce"
 
     # install desktop applications
     printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install misc desktop applications" 
