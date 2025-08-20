@@ -141,7 +141,11 @@ fi
 %post
 #!/bin/bash
 
-printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Post installation starts" 
+mylog() {
+    printf "**** %-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "$1" 
+}
+
+mylog  "Post installation starts" 
 
 # read arguments from ipxe
 set -- `cat /proc/cmdline`
@@ -157,7 +161,6 @@ echo "%wheel	ALL=(ALL)	NOPASSWD: ALL" > /etc/sudoers.d/nopasswd
 
 yum install epel-release yum-utils -y   
 yum config-manager --set-enabled powertools
-#dnf reinstall ca-certificates -y
 
 # Update Rocky and EPEL repository baseurls to use the provided ${baseurl}
 case $region in
@@ -189,7 +192,7 @@ if [ -n "$epel_url" ]; then
 fi
 
 # install essential packages
-printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install essential packages" 
+mylog  "Install essential packages" 
 yum update -y
 yum install libnsl -y
 dnf install -y rsync util-linux curl firewalld bind-utils telnet jq nano 
@@ -198,10 +201,10 @@ dnf install -y openldap-clients sssd realmd oddjob oddjob-mkhomedir adcli
 dnf install -y samba-common samba-common-tools krb5-workstation openldap-clients iperf3 rsnapshot zip 
 dnf install -y nnzip ftp autofs zsh ksh tcsh ansible cabextract fontconfig 
 dnf install -y nedit htop tar traceroute mtr pwgen ipa-admintools sssd realmd zsh ksh tcsh
-dnf install -y cyrus-sasl cyrus-sasl-plain cyrus-sasl-ldap bc nmap-ncat
+dnf install -y cyrus-sasl cyrus-sasl-plain cyrus-sasl-ldap bc nmap-ncat p7zip p7zip-plugins unrar 
 
 # install development tools
-printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install development tools" 
+mylog  "Install development tools" 
 dnf groupinstall "Development tools" -y
 
 # install docker ce
@@ -212,8 +215,13 @@ yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
 systemctl enable docker
 
 if [ $desktop = "desktop" ]; then
-    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install mate desktop" 
+
+    # install xfce desktop
+    mylog  "Install XFCE desktop" 
+    dnf groupinstall -y "Xfce"
+
     # install mate desktop
+    mylog  "Install mate desktop" 
     dnf install -y NetworkManager-adsl NetworkManager-bluetooth NetworkManager-libreswan-gnome NetworkManager-openvpn-gnome 
     dnf install -y NetworkManager-ovs NetworkManager-ppp NetworkManager-team NetworkManager-wifi NetworkManager-wwan abrt-desktop 
     dnf install -y abrt-java-connector adwaita-gtk2-theme alsa-plugins-pulseaudio atril atril-caja atril-thumbnailer caja caja-actions 
@@ -223,10 +231,32 @@ if [ $desktop = "desktop" ]; then
     dnf install -y mate-backgrounds mate-calc mate-control-center mate-desktop mate-dictionary mate-disk-usage-analyzer mate-icon-theme mate-media 
     dnf install -y mate-menus mate-menus-preferences-category-menu mate-notification-daemon mate-panel mate-polkit mate-power-manager mate-screensaver 
     dnf install -y mate-screenshot mate-search-tool mate-session-manager mate-settings-daemon mate-system-log mate-system-monitor mate-terminal mate-themes 
-    dnf install -y mate-user-admin mate-user-guide mozo network-manager-applet nm-connection-editor p7zip p7zip-plugins pluma seahorse seahorse-caja 
-    dnf install -y xdg-user-dirs-gtk slick-greeter-mate gnome-terminal lightdm-settings rxvt-unicode sssd realmd zsh ksh tcsh
-    # Disable user login list
-    sed -i "s%#greeter-hide-users=false%greeter-hide-users=true%" /etc/lightdm/lightdm.conf
+    dnf install -y mate-user-admin mate-user-guide mozo network-manager-applet nm-connection-editor pluma seahorse seahorse-caja 
+    dnf install -y xdg-user-dirs-gtk slick-greeter-mate gnome-terminal lightdm-settings rxvt-unicode 
+
+    # Update lightdm configuration 
+    #   Disable user login list
+    #   User default session to be mate
+    #   Only use sessions under /usr/share/xsessions
+    sed -i -E "s%^([[:space:]]*)#?([[:space:]]*)user-session=.*$%user-session=xfce%" /etc/lightdm/lightdm.conf
+    sed -i -E "s%^([[:space:]]*)#?([[:space:]]*)greeter-hide-users=.*$%greeter-hide-users=true%" /etc/lightdm/lightdm.conf
+
+    # Remove other sessions than allowed to use
+    ALLOWED_SESSIONS=("mate" "xfce")
+
+    # Iterate through all .desktop files in the directory
+    for file in /usr/share/xsessions/*.desktop; do
+        # Get the base name of the file (e.g., 'gnome' from 'gnome.desktop')
+        filename=$(basename "$file" .desktop)
+
+        # Check if the filename is in the list of allowed sessions
+        if [[ ! " ${ALLOWED_SESSIONS[@]} " =~ " ${filename} " ]]; then
+            rm -f "$file"
+        fi
+    done
+
+
+
     # start GUI
     systemctl isolate graphical.target
     systemctl set-default graphical.target
@@ -265,12 +295,9 @@ if [ $desktop = "desktop" ]; then
     Comment=Disable DPMS
     " > /etc/xdg/autostart/disable-dpms.desktop
 
-    # install xfce desktop
-    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install XFCE desktop" 
-    dnf groupinstall -y "Xfce"
 
     # install desktop applications
-    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install misc desktop applications" 
+    mylog  "Install misc desktop applications" 
     echo "
 [ivoarch-Tilix]
 name=Copr repo for Tilix owned by ivoarch
@@ -296,7 +323,7 @@ gpgkey=https://download.sublimetext.com/sublimehq-rpm-pub.gpg
     dnf install -y vim vim-X11 emacs tilix sublime-text meld tmux
 
     # install chrome & firefox 
-    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Install browsers" 
+    mylog  "Install browsers" 
 
     dnf install https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm -y
     dnf install -y firefox filezilla evince
@@ -306,7 +333,7 @@ gpgkey=https://download.sublimetext.com/sublimehq-rpm-pub.gpg
 
     # libre office
     lastest_libre_version=$(curl --silent --max-time 15 http://download.documentfoundation.org/libreoffice/stable/ | grep -oP 'href="\K[0-9.]+(?=/)' | sort -V | tail -1)
-    printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Libera Office verion ${lastest_libre_version}" 
+    mylog  "Libera Office verion ${lastest_libre_version}" 
     RPM_PATH="/opt/libreoffice/rpm"
     RPM_FILE="${RPM_PATH}/LibreOffice_${lastest_libre_version}_Linux_x86-64_rpm.tar.gz"
     mkdir -p $RPM_PATH
@@ -321,7 +348,7 @@ gpgkey=https://download.sublimetext.com/sublimehq-rpm-pub.gpg
         yum localinstall ${WORK_DIR}/*.rpm -y
         rm -rf WORK_DIR
     else
-        printf "%-10s : %s\n" "$(date '+%Y-%m-%d %H:%M:%S')"  "Libera Office downlaod failed" 
+        mylog  "Libera Office downlaod failed" 
     fi
 fi 
 
