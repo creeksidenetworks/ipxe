@@ -194,7 +194,7 @@ yum update -y
 yum install libnsl -y
 dnf install -y rsync util-linux curl firewalld bind-utils telnet jq nano 
 dnf install -y ed tcpdump wget nfs-utils cifs-utils samba-client tree xterm net-tools 
-dnf install -y dnf install -y openldap-clients sssd realmd oddjob oddjob-mkhomedir adcli 
+dnf install -y openldap-clients sssd realmd oddjob oddjob-mkhomedir adcli 
 dnf install -y samba-common samba-common-tools krb5-workstation openldap-clients iperf3 rsnapshot zip 
 dnf install -y nnzip ftp autofs zsh ksh tcsh ansible cabextract fontconfig 
 dnf install -y nedit htop tar traceroute mtr pwgen ipa-admintools sssd realmd zsh ksh tcsh
