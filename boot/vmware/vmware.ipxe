@@ -1,0 +1,21 @@
+#!ipxe
+
+#set base_url        http://ipxe.creekside.network
+set base_url        http://download.cn.creekside.network:58080/ipxe
+
+menu Choose VMWare ESXi Version China
+item --gap -- --------------------------------------------------------------------------
+item exsi7    VMWare ESXi 7.3n
+item exsi8    VMWare ESXi 8.1a
+item --gap -- --------------------------------------------------------------------------
+item back     Back to Main Menu
+item --gap -- --------------------------------------------------------------------------
+choose version && goto ${version}
+
+:exsi7
+kernel ${base_url}/vmware/esxi7/efi/boot/bootx64.efi -c ${base_url}/vmware/bootcfg/bootcn_esxi7.cfg
+boot
+
+:exsi8
+kernel ${base_url}/vmware/esxi8/efi/boot/bootx64.efi -c ${base_url}/vmware/bootcfg/bootcn_esxi8.cfg
+boot

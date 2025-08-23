@@ -1,11 +1,12 @@
 #!ipxe
 
 :global_vars
-set base_url        http://ipxe.creekside.network
-set vyos_url        ${base_url}/assets/vyos/disk/live
+#set base_url        http://ipxe.creekside.network
+set base_url        http://download.cn.creekside.network:58080/ipxe
+set vyos_url        ${base_url}/vyos/disk/live
 
 :main_menu
-menu Creekside Networks Boot Menu
+menu Creekside Networks China NetBoot Menu
 item --gap -- --------------------------------------------------------------------------
 item local     Boot from local HDD
 item --gap -- --------------------------------------------------------------------------
@@ -26,27 +27,11 @@ exit 1
 chain ${base_url}/rocky/rocky.ipxe
 
 :vmware
-menu Choose VMWare ESXi Version
-item --gap -- --------------------------------------------------------------------------
-item exsi7    VMWare ESXi 7.3n
-item exsi8    VMWare ESXi 8.1a
-item --gap -- --------------------------------------------------------------------------
-item back     Back to Main Menu
-item --gap -- --------------------------------------------------------------------------
-choose version && goto ${version}
+chain ${base_url}/vmware/vmware.ipxe
 
 :vyos
 kernel ${vyos_url}/vmlinuz boot=live components hostname=vyos username=live nopersistence noautologin union=overlay console=tty0 net.ifnames=0 biosdevname=0 fetch=${vyos_url}/filesystem.squashfs initrd=initrd.magic 
 initrd ${vyos_url}/initrd.img
-boot
-
-
-:exsi7
-kernel http://ipxe.creekside.network/assets/vmware/esxi7/efi/boot/bootx64.efi -c http://ipxe.creekside.network/assets/vmware/bootcfg/boot_esxi7.cfg
-boot
-
-:exsi8
-kernel http://ipxe.creekside.network/assets/vmware/esxi8/efi/boot/bootx64.efi -c http://ipxe.creekside.network/assets/vmware/bootcfg/boot_esxi8.cfg
 boot
 
 :shell
