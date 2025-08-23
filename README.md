@@ -31,7 +31,6 @@ set interfaces loopback lo address 10.255.255.254/32
 set service dhcp-server use-dnsmasq enable
 set service dns forwarding options enable-tftp
 set service dns forwarding options tftp-root=/config/user-data/tftproot
-set service dns forwarding options listen-address=10.255.255.254
 set service dns forwarding options 'dhcp-match=set:bios,60,PXEClient:Arch:00000'
 set service dns forwarding options 'dhcp-boot=tag:bios,undionly.kpxe,,10.255.255.254'
 set service dns forwarding options 'dhcp-match=set:efi32,60,PXEClient:Arch:00002'

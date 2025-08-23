@@ -1,8 +1,7 @@
 #!ipxe
 
 :global_vars
-#set base_url        http://ipxe.creekside.network/rocky
-set base_url        http://download.cn.creekside.network:58080/ipxe
+set base_url        http://download.creekside.network/ipxe
 
 :version_menu
 menu Choose Rocky Linux Version

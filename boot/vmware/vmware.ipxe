@@ -1,8 +1,8 @@
 #!ipxe
 
-#set base_url        http://ipxe.creekside.network/ipxe
+#set base_url        http://download.creekside.network/ipxe
 
-
+:version_menu
 menu Choose VMWare ESXi
 item --gap -- --------------------------------------------------------------------------
 item esxi7    VMWare ESXi 7.0U3n
@@ -26,15 +26,15 @@ goto region_menu
 :region_menu
 menu Choose Region
 item --gap -- --------------------------------------------------------------------------
-item Global   ipxe.creekside.network
-item China    download.cn.creekside.network
+item Global   California
+item China    China
 item --gap -- --------------------------------------------------------------------------
-item partition_menu     Back to Desktop Selection
+item version_menu     Back to version selection
 item --gap -- --------------------------------------------------------------------------
 choose region && goto ${region}
 
 :Global
-set base_url        http://ipxe.creekside.network/ipxe/vmware
+set base_url        http://download.creekside.network/ipxe/vmware/${version}
 set region 
 goto launch
 

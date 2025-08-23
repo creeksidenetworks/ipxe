@@ -1,12 +1,12 @@
 #!ipxe
 
-set vyos_url        http://ipxe.creekside.network/ipxe/vyos/disk/live
+set vyos_url        http://download.creekside.network/ipxe/vyos/disk/live
 set vyos_url_cn        http://download.cn.creekside.network:58080/ipxe/vyos/disk/live
 
 menu Choose region
 item --gap -- --------------------------------------------------------------------------
-item China    Install from China server
-item Global    Install from global server
+item Global    California
+item China    China
 item --gap -- --------------------------------------------------------------------------
 item back     Back to Main Menu
 item --gap -- --------------------------------------------------------------------------

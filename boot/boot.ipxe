@@ -1,11 +1,11 @@
 #!ipxe
 
 :global_vars
-set base_url        http://ipxe.creekside.network/ipxe/
+set base_url        http://download.creekside.network/ipxe/
 set vyos_url        ${base_url}/vyos/disk/live
 
 :main_menu
-menu Creekside Networks China NetBoot Menu
+menu Creekside Networks NetBoot Menu
 item --gap -- --------------------------------------------------------------------------
 item local     Boot from local HDD
 item --gap -- --------------------------------------------------------------------------
