@@ -1,21 +1,48 @@
 #!ipxe
 
-#set base_url        http://ipxe.creekside.network
-set base_url        http://download.cn.creekside.network:58080/ipxe
+#set base_url        http://ipxe.creekside.network/ipxe
 
-menu Choose VMWare ESXi Version China
+
+menu Choose VMWare ESXi
 item --gap -- --------------------------------------------------------------------------
-item exsi7    VMWare ESXi 7.3n
-item exsi8    VMWare ESXi 8.1a
+item esxi7    VMWare ESXi 7.0U3n
+item esxi8    VMWare ESXi 8.0U3e
 item --gap -- --------------------------------------------------------------------------
 item back     Back to Main Menu
 item --gap -- --------------------------------------------------------------------------
 choose version && goto ${version}
 
-:exsi7
-kernel ${base_url}/vmware/esxi7/efi/boot/bootx64.efi -c ${base_url}/vmware/bootcfg/bootcn_esxi7.cfg
-boot
+:back
+chain ${base_url}/boot.ipxe
 
-:exsi8
-kernel ${base_url}/vmware/esxi8/efi/boot/bootx64.efi -c ${base_url}/vmware/bootcfg/bootcn_esxi8.cfg
+:esxi7
+set version 7.0U3n
+goto region_menu
+
+:esxi8
+set version 8.0U3e
+goto region_menu
+
+:region_menu
+menu Choose Region
+item --gap -- --------------------------------------------------------------------------
+item Global   ipxe.creekside.network
+item China    download.cn.creekside.network
+item --gap -- --------------------------------------------------------------------------
+item partition_menu     Back to Desktop Selection
+item --gap -- --------------------------------------------------------------------------
+choose region && goto ${region}
+
+:Global
+set base_url        http://ipxe.creekside.network/ipxe/vmware
+set region 
+goto launch
+
+:China
+set base_url        http://download.cn.creekside.network:58080/ipxe/vmware/${version}
+set country cn
+goto launch
+
+:launch
+kernel ${base_url}/efi/boot/bootx64.efi -c ${base_url}/boot.cfg
 boot

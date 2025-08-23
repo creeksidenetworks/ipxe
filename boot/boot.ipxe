@@ -1,8 +1,7 @@
 #!ipxe
 
 :global_vars
-#set base_url        http://ipxe.creekside.network
-set base_url        http://download.cn.creekside.network:58080/ipxe
+set base_url        http://ipxe.creekside.network/ipxe/
 set vyos_url        ${base_url}/vyos/disk/live
 
 :main_menu
@@ -30,9 +29,7 @@ chain ${base_url}/rocky/rocky.ipxe
 chain ${base_url}/vmware/vmware.ipxe
 
 :vyos
-kernel ${vyos_url}/vmlinuz boot=live components hostname=vyos username=live nopersistence noautologin union=overlay console=tty0 net.ifnames=0 biosdevname=0 fetch=${vyos_url}/filesystem.squashfs initrd=initrd.magic 
-initrd ${vyos_url}/initrd.img
-boot
+chain ${base_url}/vyos/vyos.ipxe
 
 :shell
 shell

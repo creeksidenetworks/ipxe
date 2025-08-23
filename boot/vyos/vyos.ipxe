@@ -1,0 +1,26 @@
+#!ipxe
+
+set vyos_url        http://ipxe.creekside.network/ipxe/vyos/disk/live
+set vyos_url_cn        http://download.cn.creekside.network:58080/ipxe/vyos/disk/live
+
+menu Choose region
+item --gap -- --------------------------------------------------------------------------
+item China    Install from China server
+item Global    Install from global server
+item --gap -- --------------------------------------------------------------------------
+item back     Back to Main Menu
+item --gap -- --------------------------------------------------------------------------
+choose version && goto ${version}
+
+:China
+kernel ${vyos_url_cn}/vmlinuz boot=live components hostname=vyos username=live nopersistence noautologin union=overlay console=tty0 net.ifnames=0 biosdevname=0 fetch=${vyos_url_cn}/filesystem.squashfs initrd=initrd.magic 
+initrd ${vyos_url_cn}/initrd.img
+boot
+
+:Global
+kernel ${vyos_url}/vmlinuz boot=live components hostname=vyos username=live nopersistence noautologin union=overlay console=tty0 net.ifnames=0 biosdevname=0 fetch=${vyos_url}/filesystem.squashfs initrd=initrd.magic 
+initrd ${vyos_url}/initrd.img
+boot
+
+:back
+chain ${base_url}/boot.ipxe
